@@ -39,6 +39,50 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     session = NSURLSession.sharedSession()
   }
   
+  func fetchThumbs(iRange: Range<UInt8>, jRange: Range<UInt8>, progress: (UInt,UInt) -> (), callback: Bool -> ()) {
+    let targetQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)
+  
+    // construct requests for the specified rectangular range
+    var requests : [FetchRequest] = []
+    requests.reserveCapacity(iRange.count*jRange.count)
+    
+    for i in iRange {
+      for j in jRange {
+        let request : FetchRequest = FetchRequest.init(i: i, j: j, isThumb: true)
+        requests.append(request)
+      }
+    }
+
+    // track request processing progress
+    let totalRequests : UInt = UInt(requests.count)
+    var completedRequests : UInt = 0
+    
+    // use a dispatch group to batch the requests with a single callback at the end
+    let batchGroup: dispatch_group_t = dispatch_group_create()
+
+    for request in requests {
+      dispatch_group_enter(batchGroup)
+      dispatch_group_async(batchGroup, targetQueue) {
+        let urlString : String = self.baseUrl + "/" + request.urlString()
+        self.downloadImageAtUrl(urlString) {
+          (success: Bool) in
+          
+          dispatch_async(dispatch_get_main_queue()) {
+            completedRequests += 1
+            progress(completedRequests, totalRequests)
+          }
+          dispatch_group_leave(batchGroup)
+        }
+      }
+    }
+    
+    dispatch_group_notify(batchGroup, targetQueue) {
+      dispatch_async(dispatch_get_main_queue()) {
+        callback(true)
+      }
+    }
+  }
+  
   // retrieve manifest and store it in local cache
   // dispatches callback to main queue
   func fetchManifest(callback: Bool -> ()) {
