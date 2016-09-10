@@ -8,20 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		7EB428071D8332BA004FBEAC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB428061D8332BA004FBEAC /* AppDelegate.swift */; };
-		7EB428091D8332BA004FBEAC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB428081D8332BA004FBEAC /* ViewController.swift */; };
 		7EB4280C1D8332BA004FBEAC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7EB4280A1D8332BA004FBEAC /* Main.storyboard */; };
 		7EB4280E1D8332BA004FBEAC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7EB4280D1D8332BA004FBEAC /* Assets.xcassets */; };
 		7EB428111D8332BA004FBEAC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7EB4280F1D8332BA004FBEAC /* LaunchScreen.storyboard */; };
+		7EB4281D1D837452004FBEAC /* FrameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB4281C1D837451004FBEAC /* FrameViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		7EB428031D8332BA004FBEAC /* 350Bush.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = 350Bush.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EB428061D8332BA004FBEAC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		7EB428081D8332BA004FBEAC /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		7EB4280B1D8332BA004FBEAC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		7EB4280D1D8332BA004FBEAC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7EB428101D8332BA004FBEAC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7EB428121D8332BA004FBEAC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7EB4281C1D837451004FBEAC /* FrameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,11 +55,11 @@
 			isa = PBXGroup;
 			children = (
 				7EB428061D8332BA004FBEAC /* AppDelegate.swift */,
-				7EB428081D8332BA004FBEAC /* ViewController.swift */,
 				7EB4280A1D8332BA004FBEAC /* Main.storyboard */,
 				7EB4280D1D8332BA004FBEAC /* Assets.xcassets */,
 				7EB4280F1D8332BA004FBEAC /* LaunchScreen.storyboard */,
 				7EB428121D8332BA004FBEAC /* Info.plist */,
+				7EB4281C1D837451004FBEAC /* FrameViewController.swift */,
 			);
 			path = 350Bush;
 			sourceTree = "<group>";
@@ -135,8 +135,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7EB428091D8332BA004FBEAC /* ViewController.swift in Sources */,
 				7EB428071D8332BA004FBEAC /* AppDelegate.swift in Sources */,
+				7EB4281D1D837452004FBEAC /* FrameViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,7 +253,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = 350Bush/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.aubreygoodman.-50Bush";
+				PRODUCT_BUNDLE_IDENTIFIER = com.aubreygoodman.bushst;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -264,7 +264,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = 350Bush/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.aubreygoodman.-50Bush";
+				PRODUCT_BUNDLE_IDENTIFIER = com.aubreygoodman.bushst;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
