@@ -11,12 +11,19 @@ import UIKit
 
 class FrameViewController : UIViewController {
   
+  let panThreshold : Float = 4
+  
   @IBOutlet var imageView: UIImageView?
   var i: UInt8 = 0
   var j: UInt8 = 0
+  var lastUpdateTime: NSDate = NSDate.init()
   
   override func viewDidLoad() {
     super.viewDidLoad()
+    
+    // create pan gesture recognizer to track touches
+    let recognizer : UIPanGestureRecognizer = UIPanGestureRecognizer.init(target: self, action: Selector("handlePan:"))
+    self.view.addGestureRecognizer(recognizer)
     
     ImageManager.sharedInstance.fetchManifest() {
       (success: Bool) in
@@ -36,6 +43,38 @@ class FrameViewController : UIViewController {
     
   }
   
+  @IBAction func up() {
+    if( self.i < UInt8(ImageManager.sharedInstance.gridSize) - 1 ) {
+      self.i += 1
+    }
+    self.loadCurrentFrame()
+    self.preloadThumbs()
+  }
+  
+  @IBAction func down() {
+    if( self.i > 0 ) {
+      self.i -= 1
+      self.loadCurrentFrame()
+      self.preloadThumbs()
+    }
+  }
+
+  @IBAction func left() {
+    if( self.j > 0 ) {
+      self.j -= 1
+      self.loadCurrentFrame()
+      self.preloadThumbs()
+    }
+  }
+  
+  @IBAction func right() {
+    if( self.j < UInt8(ImageManager.sharedInstance.gridSize) - 1 ) {
+      self.j += 1
+      self.loadCurrentFrame()
+      self.preloadThumbs()
+    }
+  }
+  
   private func preloadThumbs() {
   
     let delta : UInt8 = ImageManager.sharedInstance.delta
@@ -50,8 +89,17 @@ class FrameViewController : UIViewController {
       
       let val = success ? "OK" : "FAIL"
       NSLog("ImageManager.preloadThumbs %@", val)
+      self.loadCurrentFrame()
     }
     
+  }
+  
+  private func loadCurrentFrame() {
+    ImageManager.sharedInstance.loadImage(self.i, j: self.j) {
+      (image: UIImage) in
+      
+      self.imageView?.image = image
+    }
   }
   
   private func loadManifestContents() {
@@ -65,8 +113,8 @@ class FrameViewController : UIViewController {
       }
       
       NSLog("ImageManager.loadManifest OK (size: %d)", ImageManager.sharedInstance.gridSize)
-      self.i = UInt8(ImageManager.sharedInstance.gridSize / 2)
-      self.j = self.i
+      self.i = 0
+      self.j = UInt8(ImageManager.sharedInstance.gridSize / 2)
       self.preloadThumbs()
     }
     
@@ -79,6 +127,32 @@ class FrameViewController : UIViewController {
     let vmaxResult = Int.addWithOverflow(Int(val), Int(delta))
     let vmax = min(vmaxResult.0, Int(sizeMax))
     return UInt8(vmin)...UInt8(vmax)
+  }
+  
+  @IBAction func handlePan(gestureRecognizer: UIPanGestureRecognizer) {
+    if( gestureRecognizer.state == .Changed ) {
+      let velocity = gestureRecognizer.velocityInView(self.view)
+      let projectedDate : NSDate = self.lastUpdateTime.dateByAddingTimeInterval(0.1)
+      let now : NSDate = NSDate.init()
+      if( projectedDate.compare(now) == .OrderedAscending ) {
+        if( Float(velocity.x) > self.panThreshold ) {
+          self.lastUpdateTime = NSDate.init()
+          self.left()
+        }
+        else if( Float(velocity.x) < -self.panThreshold ) {
+          self.lastUpdateTime = NSDate.init()
+          self.right()
+        }
+        else if( Float(velocity.y) > self.panThreshold ) {
+          self.lastUpdateTime = NSDate.init()
+          self.down()
+        }
+        else if( Float(velocity.y) < -self.panThreshold ) {
+          self.lastUpdateTime = NSDate.init()
+          self.up()
+        }
+      }
+    }
   }
 }
 
