@@ -21,6 +21,7 @@ class ImageManager : NSObject, NSURLSessionDelegate {
   var cache: NSCache
   var thumbCache: NSCache
   var hashCodeCache: NSCache
+  var pendingUrls: NSMutableSet
   var session: NSURLSession
   var sessionQueue: NSOperationQueue
   
@@ -35,6 +36,7 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     cache = NSCache.init()
     thumbCache = NSCache.init()
     hashCodeCache = NSCache.init()
+    pendingUrls = NSMutableSet.init(capacity: 10)
     sessionQueue = NSOperationQueue.init()
     session = NSURLSession.sharedSession()
   }
@@ -190,8 +192,10 @@ class ImageManager : NSObject, NSURLSessionDelegate {
       
       let filePath = self.filePathForUrl(urlString)
       var fileExists : Bool = false
+      var isPending : Bool = false
       dispatch_sync(dispatch_get_main_queue()) {
         fileExists = self.fileExists(filePath)
+        isPending = self.pendingUrls.containsObject(urlString)
       }
       
       if( fileExists ) {
@@ -201,9 +205,24 @@ class ImageManager : NSObject, NSURLSessionDelegate {
         return
       }
       
+      if( isPending ) {
+        dispatch_async(dispatch_get_main_queue()) {
+          callback(false)
+        }
+        return
+      }
+
+      dispatch_sync(dispatch_get_main_queue()) {
+        self.pendingUrls.addObject(urlString)
+      }
+      
       let remoteUrl = NSURL.init(string: urlString)
       self.session.downloadTaskWithURL(remoteUrl!, completionHandler: {
         (fileUrl: NSURL?, response: NSURLResponse?, error: NSError?) in
+        
+        dispatch_sync(dispatch_get_main_queue()) {
+          self.pendingUrls.removeObject(urlString)
+        }
 
         if( error != nil ) {
           NSLog("unable to download image %@", error!)
