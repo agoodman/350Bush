@@ -14,6 +14,7 @@ class FrameViewController : UIViewController {
   let panThreshold : Float = 20
   let spaceThreshold : Float = 10
   let timeThreshold : Float = 50
+  let fullResolutionDelay: NSTimeInterval = 0.25
   
   @IBOutlet var imageView: UIImageView?
   @IBOutlet var horizontalSlider: UISlider?
@@ -24,6 +25,7 @@ class FrameViewController : UIViewController {
   var lastUpdateTime: NSDate = NSDate.init()
   var iActive: Bool = false
   var jActive: Bool = false
+  var timer: NSTimer?
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -122,8 +124,13 @@ class FrameViewController : UIViewController {
 
   private func loadCurrentThumb() {
     NSLog("Frame.loadThumb %d, %d", self.i, self.j)
+    if( self.timer != nil ) {
+      self.timer?.invalidate()
+    }
     
     loadCurrentFrame(.Thumb)
+    
+    self.timer = NSTimer.scheduledTimerWithTimeInterval(fullResolutionDelay, target: self, selector: #selector(loadCurrentFull), userInfo: nil, repeats: false)
   }
   
   @objc private func loadCurrentFull() {
