@@ -106,24 +106,28 @@ class ImageManager : NSObject, NSURLSessionDelegate {
           return
         }
 
-        let dstUrl = NSURL.fileURLWithPath(self.manifestPath)
-        do {
-          if( NSFileManager.defaultManager().fileExistsAtPath(self.manifestPath) ) {
-            _ = try NSFileManager.defaultManager().replaceItemAtURL(dstUrl, withItemAtURL: fileUrl!, backupItemName: nil, options: NSFileManagerItemReplacementOptions.UsingNewMetadataOnly, resultingItemURL: nil)
+        // dispatch file io synchronously to main queue
+        dispatch_sync(dispatch_get_main_queue()) {
+          let dstUrl = NSURL.fileURLWithPath(self.manifestPath)
+          do {
+            // always replace the existing manifest with the remote
+            if( NSFileManager.defaultManager().fileExistsAtPath(self.manifestPath) ) {
+              _ = try NSFileManager.defaultManager().replaceItemAtURL(dstUrl, withItemAtURL: fileUrl!, backupItemName: nil, options: NSFileManagerItemReplacementOptions.UsingNewMetadataOnly, resultingItemURL: nil)
+            }
+            else {
+              _ = try NSFileManager.defaultManager().moveItemAtURL(fileUrl!, toURL: dstUrl)
+            }
+          } catch let error as NSError {
+            NSLog("ImageManager.fetchManifest - unable to move file: %@", error)
+            dispatch_async(dispatch_get_main_queue()) {
+              callback(false)
+            }
+            return
           }
-          else {
-            _ = try NSFileManager.defaultManager().moveItemAtURL(fileUrl!, toURL: dstUrl)
-          }
-        } catch let error as NSError {
-          NSLog("unable to move file: %@", error)
-          dispatch_async(dispatch_get_main_queue()) {
-            callback(false)
-          }
-          return
-        }
 
-        dispatch_async(dispatch_get_main_queue()) {
-          callback(true)
+          dispatch_async(dispatch_get_main_queue()) {
+            callback(true)
+          }
         }
       }).resume();
       
@@ -155,11 +159,15 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     }
   }
   
+  func loadImage(i: UInt8, j: UInt8, callback: UIImage -> ()) {
+    self.loadImageAtUrl(self.urlForFrame(i, j: j), callback: callback)
+  }
+  
   // runs on main queue
   func loadImageAtUrl(url: String, callback: UIImage -> ()) {
     // first, check the cache
     let hashCode = generateHashCode(url) as UInt64
-    let image = cache.objectForKey(NSNumber.init(unsignedLongLong: hashCode))
+    let image = self.cache.objectForKey(NSNumber.init(unsignedLongLong: hashCode))
     if( image != nil ) {
       callback(image as! UIImage)
       return
@@ -181,7 +189,12 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
       
       let filePath = self.filePathForUrl(urlString)
-      if( NSFileManager.defaultManager().fileExistsAtPath(filePath) ) {
+      var fileExists : Bool = false
+      dispatch_sync(dispatch_get_main_queue()) {
+        fileExists = self.fileExists(filePath)
+      }
+      
+      if( fileExists ) {
         dispatch_async(dispatch_get_main_queue()) {
           callback(true)
         }
@@ -221,19 +234,21 @@ class ImageManager : NSObject, NSURLSessionDelegate {
         // NOTE: can't dispatch this to a different queue because file is deleted
         //       immediately after completion block executes
         
-        let dstUrl = NSURL.fileURLWithPath(filePath)
-        do {
-          _ = try NSFileManager.defaultManager().moveItemAtURL(fileUrl!, toURL: dstUrl)
-        } catch let error as NSError {
-          NSLog("unable to move file: %@", error)
-          dispatch_async(dispatch_get_main_queue()) {
-            callback(false)
+        dispatch_sync(dispatch_get_main_queue()) {
+          let dstUrl = NSURL.fileURLWithPath(filePath)
+          do {
+            _ = try NSFileManager.defaultManager().moveItemAtURL(fileUrl!, toURL: dstUrl)
+          } catch let error as NSError {
+            NSLog("ImageManager.downloadImage - unable to move file: %@", error)
+            dispatch_async(dispatch_get_main_queue()) {
+              callback(false)
+            }
+            return
           }
-          return
-        }
-        
-        dispatch_async(dispatch_get_main_queue()) {
-          callback(true)
+          
+          dispatch_async(dispatch_get_main_queue()) {
+            callback(true)
+          }
         }
         
       }).resume()
@@ -260,6 +275,11 @@ class ImageManager : NSObject, NSURLSessionDelegate {
   
   // generates a rudimentary hash code from the string
   private func generateHashCode(src: String) -> UInt64 {
+    let cachedValue = self.hashCodeCache.objectForKey(src) as! NSNumber?
+    if( cachedValue != nil ) {
+      return (cachedValue?.unsignedLongLongValue)!
+    }
+    
     let length = src.lengthOfBytesUsingEncoding(NSUTF8StringEncoding)
     var val = 7 as UInt64
     let factoringPrime = 85839547 as UInt64
@@ -273,6 +293,13 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     return val
   }
   
+  private func fileExists(filePath: String) -> Bool {
+    if( NSFileManager.defaultManager().fileExistsAtPath(filePath) ) {
+      return true
+    }
+    return false
+  }
+  
   // generates a file path mapping to the given urlString
   private func filePathForUrl(urlString: String) -> String {
     if( !hasValidCacheDirectory() ) {
@@ -280,22 +307,30 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     }
     
     let hashCode = generateHashCode(urlString) as UInt64
-    let filePath = cachePath + "/" + String(hashCode) + ".png"
+    let filePath = cachePath + "/" + String(hashCode) + ".jpg"
     return filePath
   }
   
   private func hasValidCacheDirectory() -> Bool {
-    var isValid : ObjCBool = false
-    if( !NSFileManager.defaultManager().fileExistsAtPath(cachePath, isDirectory: &isValid) || !isValid ) {
-      do {
-        _ = try NSFileManager.defaultManager().createDirectoryAtPath(cachePath, withIntermediateDirectories: true, attributes: nil)
-      } catch let error as NSError {
-        NSLog("unable to initialize caches directory: %@", error)
-        return false
+    var isValid : ObjCBool = true
+    dispatch_sync(dispatch_get_main_queue()) {
+      if( !NSFileManager.defaultManager().fileExistsAtPath(self.cachePath, isDirectory: &isValid) || !isValid ) {
+        do {
+          _ = try NSFileManager.defaultManager().createDirectoryAtPath(self.cachePath, withIntermediateDirectories: true, attributes: nil)
+        } catch let error as NSError {
+          NSLog("unable to initialize caches directory: %@", error)
+          isValid = false
+        }
       }
     }
-    return true
+    return isValid.boolValue
   }
+  
+  private func urlForFrame(i: UInt8, j: UInt8) -> String {
+    let urlString = self.baseUrl + String.init(format: "/grid/full/%02d-%02d.jpg", i, j)
+    return urlString
+  }
+  
 }
 
 struct Batch {
@@ -315,7 +350,7 @@ struct FetchRequest {
   }
   
   func urlString() -> String {
-    return String.init(format: "thumb/%02d-%02d.png", i, j)
+    return String.init(format: "grid/full/%02d-%02d.jpg", i, j)
   }
   
 }
