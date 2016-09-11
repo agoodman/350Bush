@@ -19,14 +19,15 @@ class ImageManager : NSObject, NSURLSessionDelegate {
   var cachePath: String
   var manifestPath: String
   var cache: NSCache
-  var thumbCache: NSCache
   var hashCodeCache: NSCache
   var pendingUrls: NSMutableSet
+  var activeTasks: [NSURLSessionTask] = []
   var session: NSURLSession
   var sessionQueue: NSOperationQueue
   
   var gridSize: UInt = 0
-  var delta: UInt8 = 3
+  var delta: UInt8 = 5
+  var cancelOnFetch: Bool = true
 
   init(baseUrl: String, cachePath: String) {
     self.baseUrl = baseUrl
@@ -34,14 +35,31 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     self.cachePath = cachePath
     self.manifestPath = cachePath + "/manifest.json"
     cache = NSCache.init()
-    thumbCache = NSCache.init()
     hashCodeCache = NSCache.init()
     pendingUrls = NSMutableSet.init(capacity: 10)
     sessionQueue = NSOperationQueue.init()
     session = NSURLSession.sharedSession()
   }
   
-  func fetchThumbs(iRange: Range<UInt8>, jRange: Range<UInt8>, progress: (UInt,UInt) -> (), callback: Bool -> ()) {
+  // fetches a rectangular range of images of the given quality
+  // runs on the main queue
+  // dispatches fetching operations to the background queue
+  // dispatches callbacks to the main queue
+  func fetchRange(iRange: Range<UInt8>, jRange: Range<UInt8>, quality: Quality, progress: (UInt,UInt) -> (), callback: Bool -> ()) {
+    if( self.cancelOnFetch ) {
+      // cancel any pending tasks before queueing new set
+      if( self.activeTasks.count > 0 ) {
+        NSLog("ImageManager.cancelActiveTasks")
+        for task in self.activeTasks {
+          task.cancel()
+        }
+        self.session.invalidateAndCancel()
+        self.activeTasks.removeAll()
+        self.pendingUrls.removeAllObjects()
+      }
+    }
+    
+    NSLog("ImageManager.fetchRange %d...%d, %d...%d", iRange.startIndex, iRange.endIndex, jRange.startIndex, jRange.endIndex)
     let targetQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)
   
     // construct requests for the specified rectangular range
@@ -65,7 +83,7 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     for request in requests {
       dispatch_group_enter(batchGroup)
       dispatch_group_async(batchGroup, targetQueue) {
-        let urlString : String = self.baseUrl + "/" + request.urlString()
+        let urlString : String = self.baseUrl + "/" + request.urlString(quality)
         self.downloadImageAtUrl(urlString) {
           (success: Bool) in
           
@@ -98,7 +116,7 @@ class ImageManager : NSObject, NSURLSessionDelegate {
         return
       }
       
-      self.session.downloadTaskWithURL(NSURL.init(string: self.manifestUrl)!, completionHandler: {
+      let task = self.session.downloadTaskWithURL(NSURL.init(string: self.manifestUrl)!) {
         (fileUrl: NSURL?, response: NSURLResponse?, error: NSError?) in
         
         if( error != nil ) {
@@ -131,7 +149,11 @@ class ImageManager : NSObject, NSURLSessionDelegate {
             callback(true)
           }
         }
-      }).resume();
+      }
+      dispatch_sync(dispatch_get_main_queue()) {
+        self.activeTasks.append(task)
+        task.resume();
+      }
       
     }
   }
@@ -161,8 +183,8 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     }
   }
   
-  func loadImage(i: UInt8, j: UInt8, callback: UIImage -> ()) {
-    self.loadImageAtUrl(self.urlForFrame(i, j: j), callback: callback)
+  func loadImage(i: UInt8, j: UInt8, quality: Quality, callback: UIImage -> ()) {
+    self.loadImageAtUrl(self.urlForFrame(i, j: j, quality: quality), callback: callback)
   }
   
   // runs on main queue
@@ -191,6 +213,13 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
       
       let filePath = self.filePathForUrl(urlString)
+      if( filePath == "" ) {
+        dispatch_async(dispatch_get_main_queue()) {
+          callback(false)
+        }
+        return
+      }
+
       var fileExists : Bool = false
       var isPending : Bool = false
       dispatch_sync(dispatch_get_main_queue()) {
@@ -217,7 +246,7 @@ class ImageManager : NSObject, NSURLSessionDelegate {
       }
       
       let remoteUrl = NSURL.init(string: urlString)
-      self.session.downloadTaskWithURL(remoteUrl!, completionHandler: {
+      let task = self.session.downloadTaskWithURL(remoteUrl!) {
         (fileUrl: NSURL?, response: NSURLResponse?, error: NSError?) in
         
         dispatch_sync(dispatch_get_main_queue()) {
@@ -225,7 +254,12 @@ class ImageManager : NSObject, NSURLSessionDelegate {
         }
 
         if( error != nil ) {
-          NSLog("unable to download image %@", error!)
+          if( error?.code == -999 ) {
+            // cancelled task; ignore the error
+          }
+          else {
+            NSLog("unable to download image %@", error!)
+          }
           dispatch_async(dispatch_get_main_queue()) {
             callback(false)
           }
@@ -269,8 +303,12 @@ class ImageManager : NSObject, NSURLSessionDelegate {
             callback(true)
           }
         }
-        
-      }).resume()
+      }
+      
+      dispatch_sync(dispatch_get_main_queue()) {
+        self.activeTasks.append(task)
+        task.resume()
+      }
     }
   }
   
@@ -281,6 +319,11 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) {
 
       let filePath = self.filePathForUrl(urlString)
+      if( filePath == "" ) {
+        // abort! empty file path. do not execute callback
+        return
+      }
+
       let imageData : NSData = NSData.init(contentsOfFile: filePath)!
       let image = UIImage.init(data: imageData)
       let key = NSNumber.init(unsignedLongLong: self.generateHashCode(urlString))
@@ -321,7 +364,7 @@ class ImageManager : NSObject, NSURLSessionDelegate {
   
   // generates a file path mapping to the given urlString
   private func filePathForUrl(urlString: String) -> String {
-    if( !hasValidCacheDirectory() ) {
+    if( !hasValidCacheDirectory() || urlString == "" ) {
       return ""
     }
     
@@ -345,8 +388,9 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     return isValid.boolValue
   }
   
-  private func urlForFrame(i: UInt8, j: UInt8) -> String {
-    let urlString = self.baseUrl + String.init(format: "/grid/full/%02d-%02d.jpg", i, j)
+  private func urlForFrame(i: UInt8, j: UInt8, quality: Quality) -> String {
+    let qualityStr = (quality == .Full ? "full" : "thumb")
+    let urlString = self.baseUrl + String.init(format: "/grid/%@/%02d-%02d.jpg", qualityStr, i, j)
     return urlString
   }
   
@@ -368,8 +412,14 @@ struct FetchRequest {
     self.isThumb = isThumb
   }
   
-  func urlString() -> String {
-    return String.init(format: "grid/full/%02d-%02d.jpg", i, j)
+  func urlString(quality: Quality) -> String {
+    let qualityStr = (quality == .Full ? "full" : "thumb")
+    return String.init(format: "grid/%@/%02d-%02d.jpg", qualityStr, i, j)
   }
   
+}
+
+enum Quality {
+  case Thumb
+  case Full
 }
