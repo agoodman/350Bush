@@ -22,10 +22,10 @@
             </objects>
             <point key="canvasLocation" x="-916" y="317"/>
         </scene>
-        <!--View Controller-->
+        <!--About View Controller-->
         <scene sceneID="UND-tf-H4N">
             <objects>
-                <viewController id="VeH-S7-YNO" sceneMemberID="viewController">
+                <viewController id="VeH-S7-YNO" customClass="AboutViewController" customModule="_50Bush" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="wSd-az-d4c"/>
                         <viewControllerLayoutGuide type="bottom" id="dHv-SN-1m3"/>
@@ -33,12 +33,105 @@
                     <view key="view" contentMode="scaleToFill" id="pyP-82-djn">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Qdb-0d-qgW" userLabel="ConceptView">
+                                <rect key="frame" x="19" y="64" width="562" height="490"/>
+                                <subviews>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="More detail is available at the blog." textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Jb0-CT-Sqv">
+                                        <rect key="frame" x="46" y="65" width="292" height="50"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="50" id="E5p-63-hkm"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F6G-g4-lIq">
+                                        <rect key="frame" x="346" y="74" width="170" height="50"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="50" id="Ngs-6o-669"/>
+                                        </constraints>
+                                        <state key="normal" title="350bush.wordpress.com"/>
+                                        <connections>
+                                            <action selector="onBlogButton" destination="VeH-S7-YNO" eventType="touchUpInside" id="qJa-ME-rg7"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="F6G-g4-lIq" secondAttribute="trailing" constant="46" id="VGe-BS-hjX"/>
+                                    <constraint firstItem="Jb0-CT-Sqv" firstAttribute="top" secondItem="Qdb-0d-qgW" secondAttribute="top" constant="65" id="Yld-VR-uVz"/>
+                                    <constraint firstItem="F6G-g4-lIq" firstAttribute="leading" secondItem="Qdb-0d-qgW" secondAttribute="leading" constant="8" id="bVp-fJ-kTi"/>
+                                    <constraint firstItem="F6G-g4-lIq" firstAttribute="top" secondItem="Qdb-0d-qgW" secondAttribute="top" constant="74" id="dxZ-4J-eAb"/>
+                                    <constraint firstAttribute="height" constant="457" id="eVr-WS-CrT"/>
+                                    <constraint firstItem="F6G-g4-lIq" firstAttribute="leading" secondItem="Jb0-CT-Sqv" secondAttribute="trailing" constant="8" id="puO-cX-EsS"/>
+                                    <constraint firstItem="Jb0-CT-Sqv" firstAttribute="leading" secondItem="Qdb-0d-qgW" secondAttribute="leading" constant="46" id="xFO-ac-dB9"/>
+                                    <constraint firstItem="Jb0-CT-Sqv" firstAttribute="top" secondItem="Qdb-0d-qgW" secondAttribute="top" constant="8" id="zgi-bN-xyY"/>
+                                </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="eVr-WS-CrT"/>
+                                        <exclude reference="zgi-bN-xyY"/>
+                                        <exclude reference="bVp-fJ-kTi"/>
+                                    </mask>
+                                </variation>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8UI-fG-snQ" userLabel="captionView">
+                                <rect key="frame" x="20" y="64" width="560" height="60"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="350Bush Time Lapse Video Project" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="85d-ex-tug">
+                                        <rect key="frame" x="0.0" y="0.0" width="560" height="50"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="50" id="stJ-q9-JSa"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                        <color key="textColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstItem="85d-ex-tug" firstAttribute="leading" secondItem="8UI-fG-snQ" secondAttribute="leading" id="0lr-bq-yDb"/>
+                                    <constraint firstAttribute="height" constant="60" id="1Ho-NM-Tq3"/>
+                                    <constraint firstItem="85d-ex-tug" firstAttribute="top" secondItem="8UI-fG-snQ" secondAttribute="top" id="JXE-Cu-3uQ"/>
+                                    <constraint firstAttribute="trailing" secondItem="85d-ex-tug" secondAttribute="trailing" id="tGn-ha-y8D"/>
+                                </constraints>
+                            </view>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XqZ-Q8-SEh">
+                                <rect key="frame" x="180" y="430" width="240" height="150"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="150" id="lC7-e2-Ip6"/>
+                                </constraints>
+                                <state key="normal" title="Continue"/>
+                                <connections>
+                                    <action selector="onContinueButton" destination="VeH-S7-YNO" eventType="touchUpInside" id="rwR-3H-O87"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="8UI-fG-snQ" firstAttribute="centerY" secondItem="pyP-82-djn" secondAttribute="centerY" id="16f-Ng-lP8"/>
+                            <constraint firstItem="8UI-fG-snQ" firstAttribute="leading" secondItem="pyP-82-djn" secondAttribute="leadingMargin" id="3UO-l4-SbM"/>
+                            <constraint firstItem="Qdb-0d-qgW" firstAttribute="top" secondItem="wSd-az-d4c" secondAttribute="bottom" id="HXE-Ol-D0a"/>
+                            <constraint firstItem="XqZ-Q8-SEh" firstAttribute="leading" secondItem="pyP-82-djn" secondAttribute="leadingMargin" constant="160" id="Iio-cm-pVQ"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Qdb-0d-qgW" secondAttribute="trailing" constant="-1" id="MbB-WK-wtl"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="XqZ-Q8-SEh" secondAttribute="trailing" constant="160" id="RUt-qM-ucp"/>
+                            <constraint firstItem="Qdb-0d-qgW" firstAttribute="leading" secondItem="pyP-82-djn" secondAttribute="leadingMargin" constant="-1" id="SMa-ag-qfL"/>
+                            <constraint firstItem="8UI-fG-snQ" firstAttribute="top" secondItem="wSd-az-d4c" secondAttribute="bottom" id="V3D-ax-dJJ"/>
+                            <constraint firstItem="dHv-SN-1m3" firstAttribute="top" secondItem="XqZ-Q8-SEh" secondAttribute="bottom" constant="20" id="hPy-en-gG4"/>
+                            <constraint firstItem="dHv-SN-1m3" firstAttribute="top" secondItem="Qdb-0d-qgW" secondAttribute="bottom" constant="46" id="qH1-ps-KjE"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="8UI-fG-snQ" secondAttribute="trailing" id="sUR-Uo-JAx"/>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="16f-Ng-lP8"/>
+                            </mask>
+                        </variation>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Q4w-jV-f3f" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="556" y="346"/>
+            <point key="canvasLocation" x="536" y="329"/>
         </scene>
         <!--350Bush-->
         <scene sceneID="tne-QT-ifu">
@@ -82,12 +175,22 @@
                             <constraint firstItem="zFl-JL-KL6" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" id="qc1-GV-FQN"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="350Bush" id="Cck-RK-jhb"/>
+                    <navigationItem key="navigationItem" title="350Bush" id="Cck-RK-jhb">
+                        <barButtonItem key="leftBarButtonItem" style="plain" id="lrH-rR-Cz5">
+                            <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="infoLight" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" id="ftR-YG-lrH">
+                                <rect key="frame" x="20" y="11" width="22" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="showAboutView" destination="BYZ-38-t0r" eventType="touchUpInside" id="8we-0e-h9Y"/>
+                                </connections>
+                            </button>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="horizontalSlider" destination="FD7-ng-rWU" id="HQJ-Di-VuZ"/>
                         <outlet property="imageView" destination="zFl-JL-KL6" id="T3d-Gy-wpE"/>
                         <outlet property="verticalSlider" destination="0q6-Ik-wdQ" id="6Lg-jg-SKP"/>
-                        <segue destination="VeH-S7-YNO" kind="show" id="k2A-ko-XIL"/>
+                        <segue destination="VeH-S7-YNO" kind="show" identifier="ShowAbout" id="k2A-ko-XIL"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

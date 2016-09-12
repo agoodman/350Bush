@@ -93,6 +93,10 @@ class FrameViewController : UIViewController {
     }
   }
   
+  @IBAction func showAboutView() {
+    self.performSegueWithIdentifier("ShowAbout", sender: self)
+  }
+  
   private func preloadThumbs() {
   
     let iDelta : UInt8 = (self.iActive ? ImageManager.sharedInstance.delta : 1)

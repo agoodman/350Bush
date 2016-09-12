@@ -17,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7E16AB601D86272800630783 /* AboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		7EB428031D8332BA004FBEAC /* 350Bush.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = 350Bush.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EB428061D8332BA004FBEAC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7EB4280B1D8332BA004FBEAC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -66,6 +67,7 @@
 				7EB428181D833354004FBEAC /* ImageManager.swift */,
 				7EB4281A1D834253004FBEAC /* StringExtensions.swift */,
 				7EB4281C1D837451004FBEAC /* FrameViewController.swift */,
+				7E16AB601D86272800630783 /* AboutViewController.swift */,
 			);
 			path = 350Bush;
 			sourceTree = "<group>";
@@ -142,6 +144,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7EB4281B1D834253004FBEAC /* StringExtensions.swift in Sources */,
+				7E16AB611D86272900630783 /* AboutViewController.swift in Sources */,
 				7EB428071D8332BA004FBEAC /* AppDelegate.swift in Sources */,
 				7EB4281D1D837452004FBEAC /* FrameViewController.swift in Sources */,
 				7EB428191D833354004FBEAC /* ImageManager.swift in Sources */,
