@@ -169,13 +169,13 @@ class ImageManager : NSObject, NSURLSessionDelegate {
         let manifest : NSDictionary = try NSJSONSerialization.JSONObjectWithData(rawJson, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
         let gridSize : NSNumber = manifest["gridSize"] as! NSNumber
 
-        dispatch_sync(dispatch_get_main_queue()) {
+        dispatch_async(dispatch_get_main_queue()) {
           self.gridSize = UInt(gridSize.integerValue)
           callback(true)
         }
       } catch let error as NSError {
         NSLog("unable to parse manifest: %@", error)
-        dispatch_sync(dispatch_get_main_queue()) {
+        dispatch_async(dispatch_get_main_queue()) {
           callback(false)
         }
         return
