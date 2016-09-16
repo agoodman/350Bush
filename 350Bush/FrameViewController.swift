@@ -22,7 +22,7 @@ class FrameViewController : UIViewController {
   
   var i: UInt8 = 0
   var j: UInt8 = 0
-  var lastUpdateTime: NSDate = NSDate.init()
+  var lastUpdateTime: NSDate = NSDate()
   var iActive: Bool = false
   var jActive: Bool = false
   var timer: NSTimer?
@@ -40,7 +40,7 @@ class FrameViewController : UIViewController {
     self.view.addGestureRecognizer(recognizer)
     
     ImageManager.sharedInstance.fetchManifest() {
-      (success: Bool) in
+      [weak self] (success: Bool) in
       
       if( !success ) {
         NSLog("ImageManager.fetchManifest FAIL")
@@ -48,7 +48,7 @@ class FrameViewController : UIViewController {
       }
       
       NSLog("ImageManager.fetchManifest OK")
-      self.loadManifestContents()
+      self!.loadManifestContents()
     }
   }
   
@@ -104,13 +104,13 @@ class FrameViewController : UIViewController {
     let iRange : Range = createRange(self.i, delta: iDelta)
     let jRange : Range = createRange(self.j, delta: jDelta)
     ImageManager.sharedInstance.fetchRange(iRange, jRange: jRange, quality: .Thumb, progress: {
-      (complete: UInt, total: UInt) in
+      [weak self] (complete: UInt, total: UInt) in
       
 //      NSLog("progress: %d of %d", complete, total)
     }) {
-      (success: Bool) in
+      [weak self] (success: Bool) in
       
-      self.loadCurrentThumb()
+      self!.loadCurrentThumb()
     }
     
   }
@@ -120,9 +120,9 @@ class FrameViewController : UIViewController {
     self.verticalSlider?.setValue(Float(self.i), animated: false)
         
     ImageManager.sharedInstance.loadImage(self.i, j: self.j, quality: quality) {
-      (image: UIImage) in
+      [weak self] (image: UIImage) in
       
-      self.imageView?.image = image
+      self!.imageView?.image = image
     }
   }
 
@@ -145,7 +145,7 @@ class FrameViewController : UIViewController {
   private func loadManifestContents() {
     
     ImageManager.sharedInstance.loadManifest() {
-      (success: Bool) in
+      [weak self] (success: Bool) in
       
       if( !success ) {
         NSLog("ImageManager.loadManifest FAIL")
@@ -153,13 +153,13 @@ class FrameViewController : UIViewController {
       }
       
       NSLog("ImageManager.loadManifest OK (size: %d)", ImageManager.sharedInstance.gridSize)
-      self.i = 0
-      self.j = UInt8(ImageManager.sharedInstance.gridSize / 2)
-      self.horizontalSlider?.minimumValue = 0
-      self.horizontalSlider?.maximumValue = Float(ImageManager.sharedInstance.gridSize)
-      self.verticalSlider?.minimumValue = 0
-      self.verticalSlider?.maximumValue = Float(ImageManager.sharedInstance.gridSize)
-      self.preloadThumbs()
+      self!.i = 0
+      self!.j = UInt8(ImageManager.sharedInstance.gridSize / 2)
+      self!.horizontalSlider?.minimumValue = 0
+      self!.horizontalSlider?.maximumValue = Float(ImageManager.sharedInstance.gridSize)
+      self!.verticalSlider?.minimumValue = 0
+      self!.verticalSlider?.maximumValue = Float(ImageManager.sharedInstance.gridSize)
+      self!.preloadThumbs()
     }
     
   }

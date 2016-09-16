@@ -83,8 +83,10 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     for request in requests {
       dispatch_group_enter(batchGroup)
       dispatch_group_async(batchGroup, targetQueue) {
-        let urlString : String = self.baseUrl + "/" + request.urlString(quality)
-        self.downloadImageAtUrl(urlString) {
+        [weak self] in
+        
+        let urlString : String = self!.baseUrl + "/" + request.urlString(quality)
+        self!.downloadImageAtUrl(urlString) {
           (success: Bool) in
           
           dispatch_async(dispatch_get_main_queue()) {
@@ -108,15 +110,16 @@ class ImageManager : NSObject, NSURLSessionDelegate {
   func fetchManifest(callback: Bool -> ()) {
     // dispatch request to background queue
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
+      [weak self] in
       
-      if( !self.hasValidCacheDirectory() ) {
+      if( !self!.hasValidCacheDirectory() ) {
         dispatch_async(dispatch_get_main_queue()) {
           callback(false)
         }
         return
       }
       
-      let task = self.session.downloadTaskWithURL(NSURL.init(string: self.manifestUrl)!) {
+      let task = self!.session.downloadTaskWithURL(NSURL.init(string: self!.manifestUrl)!) {
         (fileUrl: NSURL?, response: NSURLResponse?, error: NSError?) in
         
         if( error != nil ) {
@@ -128,10 +131,12 @@ class ImageManager : NSObject, NSURLSessionDelegate {
 
         // dispatch file io synchronously to main queue
         dispatch_sync(dispatch_get_main_queue()) {
-          let dstUrl = NSURL.fileURLWithPath(self.manifestPath)
+          [weak self] in
+          
+          let dstUrl = NSURL.fileURLWithPath(self!.manifestPath)
           do {
             // always replace the existing manifest with the remote
-            if( NSFileManager.defaultManager().fileExistsAtPath(self.manifestPath) ) {
+            if( NSFileManager.defaultManager().fileExistsAtPath(self!.manifestPath) ) {
               _ = try NSFileManager.defaultManager().replaceItemAtURL(dstUrl, withItemAtURL: fileUrl!, backupItemName: nil, options: NSFileManagerItemReplacementOptions.UsingNewMetadataOnly, resultingItemURL: nil)
             }
             else {
@@ -151,7 +156,7 @@ class ImageManager : NSObject, NSURLSessionDelegate {
         }
       }
       dispatch_sync(dispatch_get_main_queue()) {
-        self.activeTasks.append(task)
+        self!.activeTasks.append(task)
         task.resume();
       }
       
@@ -163,14 +168,17 @@ class ImageManager : NSObject, NSURLSessionDelegate {
   func loadManifest(callback: Bool -> ()) {
     // dispatch request to background queue
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
+      [weak self] in
       
-      let rawJson : NSData = NSData.init(contentsOfFile: self.manifestPath)!
+      let rawJson : NSData = NSData.init(contentsOfFile: self!.manifestPath)!
       do {
         let manifest : NSDictionary = try NSJSONSerialization.JSONObjectWithData(rawJson, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
         let gridSize : NSNumber = manifest["gridSize"] as! NSNumber
 
         dispatch_async(dispatch_get_main_queue()) {
-          self.gridSize = UInt(gridSize.integerValue)
+          [weak self] in
+          
+          self!.gridSize = UInt(gridSize.integerValue)
           callback(true)
         }
       } catch let error as NSError {
@@ -198,10 +206,10 @@ class ImageManager : NSObject, NSURLSessionDelegate {
     }
 
     downloadImageAtUrl(url, callback: {
-      (success: Bool) in
+      [weak self] (success: Bool) in
       
       if( success ) {
-        self.loadImageFromFile(url, callback: callback)
+        self!.loadImageFromFile(url, callback: callback)
       }
     })
   }
@@ -211,8 +219,9 @@ class ImageManager : NSObject, NSURLSessionDelegate {
   private func downloadImageAtUrl(urlString: String, callback: Bool -> ()) {
     // dispatch request to background queue
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
+      [weak self] in
       
-      let filePath = self.filePathForUrl(urlString)
+      let filePath = self!.filePathForUrl(urlString)
       if( filePath == "" ) {
         dispatch_async(dispatch_get_main_queue()) {
           callback(false)
@@ -223,8 +232,10 @@ class ImageManager : NSObject, NSURLSessionDelegate {
       var fileExists : Bool = false
       var isPending : Bool = false
       dispatch_sync(dispatch_get_main_queue()) {
-        fileExists = self.fileExists(filePath)
-        isPending = self.pendingUrls.containsObject(urlString)
+        [weak self] in
+        
+        fileExists = self!.fileExists(filePath)
+        isPending = self!.pendingUrls.containsObject(urlString)
       }
       
       if( fileExists ) {
@@ -242,15 +253,17 @@ class ImageManager : NSObject, NSURLSessionDelegate {
       }
 
       dispatch_sync(dispatch_get_main_queue()) {
-        self.pendingUrls.addObject(urlString)
+        [weak self] in
+        
+        self!.pendingUrls.addObject(urlString)
       }
       
       let remoteUrl = NSURL.init(string: urlString)
-      let task = self.session.downloadTaskWithURL(remoteUrl!) {
+      let task = self!.session.downloadTaskWithURL(remoteUrl!) {
         (fileUrl: NSURL?, response: NSURLResponse?, error: NSError?) in
         
         dispatch_sync(dispatch_get_main_queue()) {
-          self.pendingUrls.removeObject(urlString)
+          self!.pendingUrls.removeObject(urlString)
         }
 
         if( error != nil ) {
@@ -306,7 +319,9 @@ class ImageManager : NSObject, NSURLSessionDelegate {
       }
       
       dispatch_sync(dispatch_get_main_queue()) {
-        self.activeTasks.append(task)
+        [weak self] in
+        
+        self!.activeTasks.append(task)
         task.resume()
       }
     }
@@ -317,8 +332,9 @@ class ImageManager : NSObject, NSURLSessionDelegate {
   private func loadImageFromFile(urlString: String, callback: UIImage -> ()) {
     // dispatch request to background queue
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) {
+      [weak self] in
 
-      let filePath = self.filePathForUrl(urlString)
+      let filePath = self!.filePathForUrl(urlString)
       if( filePath == "" ) {
         // abort! empty file path. do not execute callback
         return
@@ -326,10 +342,12 @@ class ImageManager : NSObject, NSURLSessionDelegate {
 
       let imageData : NSData = NSData.init(contentsOfFile: filePath)!
       let image = UIImage.init(data: imageData)
-      let key = NSNumber.init(unsignedLongLong: self.generateHashCode(urlString))
+      let key = NSNumber.init(unsignedLongLong: self!.generateHashCode(urlString))
 
       dispatch_async(dispatch_get_main_queue()) {
-        self.cache.setObject(image!, forKey: key)
+        [weak self] in
+        
+        self!.cache.setObject(image!, forKey: key)
         callback(image!)
       }
     }
@@ -376,9 +394,11 @@ class ImageManager : NSObject, NSURLSessionDelegate {
   private func hasValidCacheDirectory() -> Bool {
     var isValid : ObjCBool = true
     dispatch_sync(dispatch_get_main_queue()) {
-      if( !NSFileManager.defaultManager().fileExistsAtPath(self.cachePath, isDirectory: &isValid) || !isValid ) {
+      [weak self] in
+      
+      if( !NSFileManager.defaultManager().fileExistsAtPath(self!.cachePath, isDirectory: &isValid) || !isValid ) {
         do {
-          _ = try NSFileManager.defaultManager().createDirectoryAtPath(self.cachePath, withIntermediateDirectories: true, attributes: nil)
+          _ = try NSFileManager.defaultManager().createDirectoryAtPath(self!.cachePath, withIntermediateDirectories: true, attributes: nil)
         } catch let error as NSError {
           NSLog("unable to initialize caches directory: %@", error)
           isValid = false
