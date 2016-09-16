@@ -20,6 +20,13 @@ class FrameViewController : UIViewController {
   @IBOutlet var horizontalSlider: UISlider?
   @IBOutlet var verticalSlider: UISlider?
   
+  @IBOutlet var horizontalOverlay: UIView?
+  @IBOutlet var verticalOverlay: UIView?
+  private var hasDisplayedHorizontalOverlay: Bool = false
+  private var hasDisplayedVerticalOverlay: Bool = false
+  private var hasNavigatedHorizontally: Bool = false
+  private var hasNavigatedVertically: Bool = false
+  
   var i: UInt8 = 0
   var j: UInt8 = 0
   var lastUpdateTime: NSDate = NSDate()
@@ -35,6 +42,9 @@ class FrameViewController : UIViewController {
     self.verticalSlider?.continuous = false
     self.verticalSlider?.hidden = true
     
+    self.horizontalOverlay?.hidden = true
+    self.verticalOverlay?.hidden = true
+        
     // create pan gesture recognizer to track touches
     let recognizer : UIPanGestureRecognizer = UIPanGestureRecognizer.init(target: self, action: #selector(handlePan))
     self.view.addGestureRecognizer(recognizer)
@@ -57,7 +67,25 @@ class FrameViewController : UIViewController {
     
   }
   
+  override func viewDidAppear(animated: Bool) {
+    super.viewDidAppear(animated)
+
+    if( !self.hasDisplayedHorizontalOverlay ) {
+      self.horizontalOverlay?.hidden = false
+      self.hasDisplayedHorizontalOverlay = true
+    }
+    else if( !self.hasDisplayedVerticalOverlay ) {
+      self.verticalOverlay?.hidden = false
+      self.hasDisplayedVerticalOverlay = true
+    }
+  }
+  
   @IBAction func up() {
+    if( self.hasDisplayedVerticalOverlay ) {
+      self.hasNavigatedVertically = true
+      self.refreshOverlays()
+    }
+    
     if( self.i < UInt8(ImageManager.sharedInstance.gridSize) - 1 ) {
       NSLog("ImageManager.up")
       self.i += 1
@@ -67,6 +95,11 @@ class FrameViewController : UIViewController {
   }
   
   @IBAction func down() {
+    if( self.hasDisplayedVerticalOverlay ) {
+      self.hasNavigatedVertically = true
+      self.refreshOverlays()
+    }
+
     if( self.i > 0 ) {
       NSLog("ImageManager.down")
       self.i -= 1
@@ -76,6 +109,11 @@ class FrameViewController : UIViewController {
   }
 
   @IBAction func left() {
+    if( self.hasDisplayedHorizontalOverlay ) {
+      self.hasNavigatedHorizontally = true
+      self.refreshOverlays()
+    }
+
     if( self.j > 0 ) {
       NSLog("ImageManager.left")
       self.j -= 1
@@ -85,6 +123,11 @@ class FrameViewController : UIViewController {
   }
   
   @IBAction func right() {
+    if( self.hasDisplayedHorizontalOverlay ) {
+      self.hasNavigatedHorizontally = true
+      self.refreshOverlays()
+    }
+
     if( self.j < UInt8(ImageManager.sharedInstance.gridSize) - 1 ) {
       NSLog("ImageManager.right")
       self.j += 1
@@ -173,12 +216,38 @@ class FrameViewController : UIViewController {
     return UInt8(vmin)...UInt8(vmax)
   }
   
+  private func refreshOverlays() {
+    if( hasDisplayedVerticalOverlay && hasNavigatedVertically ) {
+      dispatch_after(500, dispatch_get_main_queue()) {
+        [unowned self] in
+        self.verticalOverlay?.hidden = true
+      }
+    }
+    else if( hasDisplayedHorizontalOverlay && hasNavigatedHorizontally ) {
+      dispatch_after(500, dispatch_get_main_queue()) {
+        [unowned self] in
+        self.horizontalOverlay?.hidden = true
+      }
+    }
+  }
+  
   @IBAction func handlePan(gestureRecognizer: UIPanGestureRecognizer) {
     if( gestureRecognizer.state == .Ended ) {
       self.iActive = false
       self.jActive = false
       self.horizontalSlider?.hidden = true
       self.verticalSlider?.hidden = true
+
+      if( hasNavigatedHorizontally && !hasNavigatedVertically ) {
+        dispatch_after(500, dispatch_get_main_queue()) {
+          [weak self] in
+          
+          self!.verticalOverlay?.hidden = false
+          self!.hasDisplayedVerticalOverlay = true
+        }
+      }
+      
+      self.refreshOverlays()
     }
     else if( gestureRecognizer.state == .Changed ) {
       let translation = gestureRecognizer.translationInView(self.view)
