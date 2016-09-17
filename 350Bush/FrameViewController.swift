@@ -8,6 +8,9 @@
 
 import Foundation
 import UIKit
+import RxSwift
+import RxCocoa
+
 
 class FrameViewController : UIViewController {
   
@@ -26,6 +29,8 @@ class FrameViewController : UIViewController {
   private var hasDisplayedVerticalOverlay: Bool = false
   private var hasNavigatedHorizontally: Bool = false
   private var hasNavigatedVertically: Bool = false
+  
+  private let frameManager: FrameManager = FrameManager()
   
   var i: UInt8 = 0
   var j: UInt8 = 0
@@ -48,6 +53,13 @@ class FrameViewController : UIViewController {
     // create pan gesture recognizer to track touches
     let recognizer : UIPanGestureRecognizer = UIPanGestureRecognizer.init(target: self, action: #selector(handlePan))
     self.view.addGestureRecognizer(recognizer)
+    
+    self.frameManager.rx_currentFrame
+      .map {
+        frame in
+        self.loadCurrentThumb()
+      }
+      .bindTo(self.imageView?.rx_image)
     
     ImageManager.sharedInstance.fetchManifest() {
       [weak self] (success: Bool) in
@@ -142,8 +154,8 @@ class FrameViewController : UIViewController {
   
   private func preloadThumbs() {
   
-    let iDelta : UInt8 = (self.iActive ? ImageManager.sharedInstance.delta : 1)
-    let jDelta : UInt8 = (self.jActive ? ImageManager.sharedInstance.delta : 1)
+    let iDelta : UInt8 = ((self.iActive || (!self.iActive && !self.jActive)) ? ImageManager.sharedInstance.delta : 1)
+    let jDelta : UInt8 = ((self.jActive  || (!self.iActive && !self.jActive)) ? ImageManager.sharedInstance.delta : 1)
     let iRange : Range = createRange(self.i, delta: iDelta)
     let jRange : Range = createRange(self.j, delta: jDelta)
     ImageManager.sharedInstance.fetchRange(iRange, jRange: jRange, quality: .Thumb, progress: {
@@ -161,7 +173,7 @@ class FrameViewController : UIViewController {
   private func loadCurrentFrame(quality: Quality) {
     self.horizontalSlider?.setValue(Float(self.j), animated: false)
     self.verticalSlider?.setValue(Float(self.i), animated: false)
-        
+    
     ImageManager.sharedInstance.loadImage(self.i, j: self.j, quality: quality) {
       [weak self] (image: UIImage) in
       
@@ -176,6 +188,7 @@ class FrameViewController : UIViewController {
     }
     
     loadCurrentFrame(.Thumb)
+
     
     self.timer = NSTimer.scheduledTimerWithTimeInterval(fullResolutionDelay, target: self, selector: #selector(loadCurrentFull), userInfo: nil, repeats: false)
   }
@@ -256,6 +269,7 @@ class FrameViewController : UIViewController {
       let now : NSDate = NSDate.init()
       if( projectedDate.compare(now) == .OrderedAscending ) {
         if( !self.iActive && !self.jActive && gestureRecognizer.numberOfTouches() == 1 && (Float(translation.x) > self.panThreshold || Float(translation.x) < -self.panThreshold) ) {
+//          NSLog("Frame.horizontalActive")
           self.horizontalSlider?.hidden = false
           self.verticalSlider?.hidden = true
           self.iActive = true
@@ -263,6 +277,7 @@ class FrameViewController : UIViewController {
           self.lastUpdateTime = NSDate.init()
         }
         else if( !self.iActive && !self.jActive && gestureRecognizer.numberOfTouches() == 1 && (Float(translation.y) > self.panThreshold || Float(translation.y) < -self.panThreshold) ) {
+//          NSLog("Frame.verticalActive")
           self.horizontalSlider?.hidden = true
           self.verticalSlider?.hidden = false
           self.iActive = false
@@ -290,5 +305,11 @@ class FrameViewController : UIViewController {
       }
     }
   }
+  
 }
 
+class FrameView : UIView {
+ 
+  
+  
+}

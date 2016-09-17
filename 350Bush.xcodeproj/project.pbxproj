@@ -15,6 +15,12 @@
 		7EB428191D833354004FBEAC /* ImageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB428181D833354004FBEAC /* ImageManager.swift */; };
 		7EB4281B1D834253004FBEAC /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB4281A1D834253004FBEAC /* StringExtensions.swift */; };
 		7EB4281D1D837452004FBEAC /* FrameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB4281C1D837451004FBEAC /* FrameViewController.swift */; };
+		7EB4281F1D838B7F004FBEAC /* FrameManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB4281E1D838B7F004FBEAC /* FrameManager.swift */; };
+		7EF153BD1D8CC20500A17EF1 /* RxBlocking.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EF153B91D8CC20500A17EF1 /* RxBlocking.framework */; };
+		7EF153BE1D8CC20500A17EF1 /* RxCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EF153BA1D8CC20500A17EF1 /* RxCocoa.framework */; };
+		7EF153BF1D8CC20500A17EF1 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EF153BB1D8CC20500A17EF1 /* RxSwift.framework */; };
+		7EF153C41D8DA9D700A17EF1 /* RxFrameManagerDelegateProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF153C31D8DA9D700A17EF1 /* RxFrameManagerDelegateProxy.swift */; };
+		7EF153C61D8DAB3B00A17EF1 /* FrameManager+Rx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF153C51D8DAB3B00A17EF1 /* FrameManager+Rx.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +34,12 @@
 		7EB428181D833354004FBEAC /* ImageManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageManager.swift; sourceTree = "<group>"; };
 		7EB4281A1D834253004FBEAC /* StringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		7EB4281C1D837451004FBEAC /* FrameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameViewController.swift; sourceTree = "<group>"; };
+		7EB4281E1D838B7F004FBEAC /* FrameManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameManager.swift; sourceTree = "<group>"; };
+		7EF153B91D8CC20500A17EF1 /* RxBlocking.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxBlocking.framework; path = Carthage/Build/iOS/RxBlocking.framework; sourceTree = "<group>"; };
+		7EF153BA1D8CC20500A17EF1 /* RxCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxCocoa.framework; path = Carthage/Build/iOS/RxCocoa.framework; sourceTree = "<group>"; };
+		7EF153BB1D8CC20500A17EF1 /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = Carthage/Build/iOS/RxSwift.framework; sourceTree = "<group>"; };
+		7EF153C31D8DA9D700A17EF1 /* RxFrameManagerDelegateProxy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RxFrameManagerDelegateProxy.swift; sourceTree = "<group>"; };
+		7EF153C51D8DAB3B00A17EF1 /* FrameManager+Rx.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FrameManager+Rx.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,6 +47,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7EF153BE1D8CC20500A17EF1 /* RxCocoa.framework in Frameworks */,
+				7EF153BD1D8CC20500A17EF1 /* RxBlocking.framework in Frameworks */,
+				7EF153BF1D8CC20500A17EF1 /* RxSwift.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,6 +61,7 @@
 			children = (
 				7EB428051D8332BA004FBEAC /* 350Bush */,
 				7EB428041D8332BA004FBEAC /* Products */,
+				7EE309441D8CBCC60009C50C /* Projects */,
 			);
 			sourceTree = "<group>";
 		};
@@ -68,9 +84,22 @@
 				7EB428181D833354004FBEAC /* ImageManager.swift */,
 				7EB4281A1D834253004FBEAC /* StringExtensions.swift */,
 				7EB4281C1D837451004FBEAC /* FrameViewController.swift */,
+				7EB4281E1D838B7F004FBEAC /* FrameManager.swift */,
 				7E16AB601D86272800630783 /* AboutViewController.swift */,
+				7EF153C31D8DA9D700A17EF1 /* RxFrameManagerDelegateProxy.swift */,
+				7EF153C51D8DAB3B00A17EF1 /* FrameManager+Rx.swift */,
 			);
 			path = 350Bush;
+			sourceTree = "<group>";
+		};
+		7EE309441D8CBCC60009C50C /* Projects */ = {
+			isa = PBXGroup;
+			children = (
+				7EF153B91D8CC20500A17EF1 /* RxBlocking.framework */,
+				7EF153BA1D8CC20500A17EF1 /* RxCocoa.framework */,
+				7EF153BB1D8CC20500A17EF1 /* RxSwift.framework */,
+			);
+			name = Projects;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -144,8 +173,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7EB4281F1D838B7F004FBEAC /* FrameManager.swift in Sources */,
 				7EB4281B1D834253004FBEAC /* StringExtensions.swift in Sources */,
+				7EF153C61D8DAB3B00A17EF1 /* FrameManager+Rx.swift in Sources */,
 				7E16AB611D86272900630783 /* AboutViewController.swift in Sources */,
+				7EF153C41D8DA9D700A17EF1 /* RxFrameManagerDelegateProxy.swift in Sources */,
 				7EB428071D8332BA004FBEAC /* AppDelegate.swift in Sources */,
 				7EB4281D1D837452004FBEAC /* FrameViewController.swift in Sources */,
 				7EB428191D833354004FBEAC /* ImageManager.swift in Sources */,
@@ -263,6 +295,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = 350Bush/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aubreygoodman.bushst;
@@ -274,6 +310,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = 350Bush/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aubreygoodman.bushst;
@@ -300,6 +340,7 @@
 				7EB428171D8332BA004FBEAC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
